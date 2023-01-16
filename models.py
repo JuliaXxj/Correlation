@@ -269,10 +269,16 @@ class SimpleCNN(BaseNet):
     def forward(self, x):
         x = self.conv1(x)
         x = F.relu(x)
+        x = F.max_pool2d(x, 2)
+
         x = self.conv2(x)
         x = F.relu(x)
+        x = F.max_pool2d(x, 2)
+
         x = self.conv3(x)
         x = F.relu(x)
+        x = F.max_pool2d(x, 2)
+
         x = self.conv4(x)
         x = F.relu(x)
         x = F.max_pool2d(x, 2)
