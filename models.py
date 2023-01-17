@@ -254,6 +254,60 @@ class MNISTNet(BaseNet):
     def model_savename(self, tag=""):
         return "MNISTNet" + tag + datetime.now().strftime("%H-%M-%S")
 
+
+class CIFAR10Net(BaseNet):
+    def __init__(self, in_channels=1, out_channels=10, bias=True):
+        super(CIFAR10Net, self).__init__()
+        self.layers=["conv1", "conv2", "fc1", "fc2"]
+        self.conv1 = nn.Conv2d(in_channels, 32, 3, 1, bias=bias)
+        self.conv2 = nn.Conv2d(32, 64, 3, 1, bias=bias)
+        self.dropout1 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc1 = nn.Linear(12544, 128, bias=bias)
+        self.fc2 = nn.Linear(128, out_channels, bias=bias)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = F.relu(x)
+        x = self.conv2(x)
+        x = F.relu(x)
+        x = F.max_pool2d(x, 2)
+        x = self.dropout1(x)
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.dropout2(x)
+        x = self.fc2(x)
+        #         output = F.log_softmax(x, dim=1)
+        return x
+
+    def register_log(self, detach=True):
+        self.reset_hooks()
+        # first layer should not make any difference?
+        self.hooks.append(self.conv1.register_forward_hook(get_activation('conv1', self.tensor_log, detach)))
+        self.hooks.append(self.conv2.register_forward_hook(get_activation('conv2', self.tensor_log, detach)))
+        self.hooks.append(self.fc1.register_forward_hook(get_activation('fc1', self.tensor_log, detach)))
+        self.hooks.append(self.fc2.register_forward_hook(get_activation('fc2', self.tensor_log, detach)))
+
+    def register_gradient(self, detach=True):
+        self.reset_bw_hooks()
+        # first layer should not make any difference?
+        self.bw_hooks.append(self.conv1.register_backward_hook(get_gradient('conv1', self.gradient_log, detach)))
+        self.bw_hooks.append(self.conv2.register_backward_hook(get_gradient('conv2', self.gradient_log, detach)))
+        self.bw_hooks.append(self.fc1.register_backward_hook(get_gradient('fc1', self.gradient_log, detach)))
+        self.bw_hooks.append(self.fc2.register_backward_hook(get_gradient('fc2', self.gradient_log, detach)))
+
+    def register_neurons(self, detach=True):
+        self.reset_n_hooks()
+        self.n_hooks.append(self.conv1.register_forward_hook(get_neurons('conv1', self.neuron_log, detach)))
+        self.n_hooks.append(self.conv2.register_forward_hook(get_neurons('conv2', self.neuron_log, detach)))
+        self.n_hooks.append(self.fc1.register_forward_hook(get_neurons('fc1', self.neuron_log, detach)))
+        self.n_hooks.append(
+            self.fc2.register_forward_hook(get_neurons('fc2', self.neuron_log, detach, is_lastlayer=False)))
+
+    def model_savename(self, tag=""):
+        return "CIFAR10Net" + tag + datetime.now().strftime("%H-%M-%S")
+
 class SimpleCNN(BaseNet):
     def __init__(self, in_channels, out_channels, bias=True):
         super(SimpleCNN, self).__init__()
