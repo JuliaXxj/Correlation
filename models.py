@@ -202,14 +202,14 @@ class FeedforwardNeuralNetModel(BaseNet):
 
 
 class MNISTNet(BaseNet):
-    def __init__(self, in_channels=1, bias=True):
+    def __init__(self, in_channels=1, out_channels=10, bias=True):
         super(MNISTNet, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 32, 3, 1, bias=bias)
         self.conv2 = nn.Conv2d(32, 64, 3, 1, bias=bias)
         self.dropout1 = nn.Dropout(0.25)
         self.dropout2 = nn.Dropout(0.5)
         self.fc1 = nn.Linear(9216, 128, bias=bias)
-        self.fc2 = nn.Linear(128, 10, bias=bias)
+        self.fc2 = nn.Linear(128, out_channels, bias=bias)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -254,7 +254,7 @@ class MNISTNet(BaseNet):
         return "MNISTNet" + tag + datetime.now().strftime("%H-%M-%S")
 
 class SimpleCNN(BaseNet):
-    def __init__(self, in_channels, bias=True):
+    def __init__(self, in_channels, out_channels, bias=True):
         super(SimpleCNN, self).__init__()
         self.layers = ["conv1", "conv2", "conv3", "conv4", "fc1", "fc2"]
         self.conv1 = nn.Conv2d(in_channels, 64, 3, 1, bias=bias)
@@ -265,7 +265,7 @@ class SimpleCNN(BaseNet):
         self.dropout2 = nn.Dropout(0.5)
         self.fc1 = nn.Linear(73728, 128, bias=bias)
         # self.fc2 = nn.Linear(1024, 128, bias=bias)
-        self.fc2 = nn.Linear(128, 10, bias=bias)
+        self.fc2 = nn.Linear(128, out_channels, bias=bias)
 
 
     def forward(self, x):
