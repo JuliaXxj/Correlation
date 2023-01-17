@@ -204,6 +204,7 @@ class FeedforwardNeuralNetModel(BaseNet):
 class MNISTNet(BaseNet):
     def __init__(self, in_channels=1, out_channels=10, bias=True):
         super(MNISTNet, self).__init__()
+        self.layers=["conv1", "conv2", "fc1", "fc2"]
         self.conv1 = nn.Conv2d(in_channels, 32, 3, 1, bias=bias)
         self.conv2 = nn.Conv2d(32, 64, 3, 1, bias=bias)
         self.dropout1 = nn.Dropout(0.25)
